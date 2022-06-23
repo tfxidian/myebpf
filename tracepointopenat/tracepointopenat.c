@@ -11,32 +11,32 @@ struct bpf_map_def SEC("maps") counting_map = {
 	.max_entries = 1,
 };
 
-
-
-struct syscalls_enter_execve_args {
+// This struct is defined according to the following format file:
+// /sys/kernel/debug/tracing/events/kmem/mm_page_alloc/format
+struct syscalls_enter_openat_args {
 	unsigned short common_type;
 	unsigned char common_flags;
 	unsigned char common_preempt_count;
-	int common_pid; 
-	long  syscall_nr;
-	long filename;
-	long  argv;
-	long  envp;
+	int common_pid;
+	long syscall_nr;
+	long dfd;
+	long filename_ptr;
+	long flags;
+	long mode;
 };
 
 
-// This struct is defined according to the following format file:
-// /sys/kernel/debug/tracing/events/kmem/mm_page_alloc/format
 // This tracepoint is defined in mm/page_alloc.c:__alloc_pages_nodemask()
 // Userspace pathname: /sys/kernel/debug/tracing/events/kmem/mm_page_alloc
-SEC("tracepoint/syscalls/sys_enter_execve")
-int sys_enter_execve(struct syscalls_enter_execve_args *ctx) {
+SEC("tracepoint/syscalls/sys_enter_openat")
+int sys_enter_openat(struct syscalls_enter_openat_args *ctx) {
 	u32 key     = 0;
 	u64 initval = 1, *valp;
- 	
-	char fmt[] = "@syscall_nr='%d' @filename='%s'";
+		char msg[] = "Hello eBPF!";
+	bpf_trace_printk(msg, sizeof(msg));
+ 	char fmt[] = "@dirfd='%d' @pathname='%s'";
 
-	bpf_trace_printk(fmt, sizeof(fmt), ctx->syscall_nr, (char *)ctx->filename);
+	bpf_trace_printk(fmt, sizeof(fmt), ctx->dfd, (char *)ctx->filename_ptr);
 
 	valp = bpf_map_lookup_elem(&counting_map, &key);
 	if (!valp) {
