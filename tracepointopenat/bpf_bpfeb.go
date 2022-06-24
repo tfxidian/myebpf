@@ -54,7 +54,7 @@ type bpfSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpfProgramSpecs struct {
-	SysEnterOpenat *ebpf.ProgramSpec `ebpf:"sys_enter_openat"`
+	SysEnterConnect *ebpf.ProgramSpec `ebpf:"sys_enter_connect"`
 }
 
 // bpfMapSpecs contains maps before they are loaded into the kernel.
@@ -96,12 +96,12 @@ func (m *bpfMaps) Close() error {
 //
 // It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpfPrograms struct {
-	SysEnterOpenat *ebpf.Program `ebpf:"sys_enter_openat"`
+	SysEnterConnect *ebpf.Program `ebpf:"sys_enter_connect"`
 }
 
 func (p *bpfPrograms) Close() error {
 	return _BpfClose(
-		p.SysEnterOpenat,
+		p.SysEnterConnect,
 	)
 }
 

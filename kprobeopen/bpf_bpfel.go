@@ -54,14 +54,14 @@ type bpfSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpfProgramSpecs struct {
-	SysEnterConnect *ebpf.ProgramSpec `ebpf:"sys_enter_connect"`
+	KprobeExecve *ebpf.ProgramSpec `ebpf:"kprobe_execve"`
 }
 
 // bpfMapSpecs contains maps before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpfMapSpecs struct {
-	CountingMap *ebpf.MapSpec `ebpf:"counting_map"`
+	KprobeMap *ebpf.MapSpec `ebpf:"kprobe_map"`
 }
 
 // bpfObjects contains all objects after they have been loaded into the kernel.
@@ -83,12 +83,12 @@ func (o *bpfObjects) Close() error {
 //
 // It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpfMaps struct {
-	CountingMap *ebpf.Map `ebpf:"counting_map"`
+	KprobeMap *ebpf.Map `ebpf:"kprobe_map"`
 }
 
 func (m *bpfMaps) Close() error {
 	return _BpfClose(
-		m.CountingMap,
+		m.KprobeMap,
 	)
 }
 
@@ -96,12 +96,12 @@ func (m *bpfMaps) Close() error {
 //
 // It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpfPrograms struct {
-	SysEnterConnect *ebpf.Program `ebpf:"sys_enter_connect"`
+	KprobeExecve *ebpf.Program `ebpf:"kprobe_execve"`
 }
 
 func (p *bpfPrograms) Close() error {
 	return _BpfClose(
-		p.SysEnterConnect,
+		p.KprobeExecve,
 	)
 }
 

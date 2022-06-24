@@ -18,7 +18,7 @@ struct syscalls_enter_execve_args {
 	unsigned char common_flags;
 	unsigned char common_preempt_count;
 	int common_pid; 
-	long  __syscall_nr;
+	long  syscall_nr;
 	long filename;
 	long  argv;
 	long  envp;
@@ -34,10 +34,9 @@ int sys_enter_execve(struct syscalls_enter_execve_args *ctx) {
 	u32 key     = 0;
 	u64 initval = 1, *valp;
  	
-	//char fmt[] = "@dirfd='%d' @pathname='%s'";
-	char fmt[] = "@common_pid='%d' @filename='%s'";
+	char fmt[] = "@syscall_nr='%d' @filename='%s'";
 
-	bpf_trace_printk(fmt, sizeof(fmt), ctx->common_pid, (char *)ctx->filename);
+	bpf_trace_printk(fmt, sizeof(fmt), ctx->syscall_nr, (char *)ctx->filename);
 
 	valp = bpf_map_lookup_elem(&counting_map, &key);
 	if (!valp) {

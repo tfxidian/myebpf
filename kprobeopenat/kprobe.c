@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include <bpf_helpers.h>
-#include <linux/ptrace.h>
+//#include <linux/ptrace.h>
 #include <bpf/bpf_core_read.h>
 #include <bpf_tracing.h>
 
@@ -27,23 +27,31 @@ struct bpf_map_def SEC("maps") kprobe_map = {
 
 
 SEC("kprobe/sys_openat")
-int kprobe_openat(int dirfd, const char *pathname, int flags) {
+int kprobe_openat(struct pt_regs *ctx) {
         u32 key     = 0;
         u64 initval = 1, *valp;
 	//int pid = bpf_get_current_pid_tgid() >> 32;
-	char fmt[] = "@file_name='%s'";
 	/*struct pt_regs *real_regs = (struct pt_regs *)PT_REGS_PARM1(ctx);
 	int dirfd (struct pt_regs *)PT_REGS_PARM1= PT_REGS_PARM1_CORE(real_regs);
 	char *pathname = (char *)PT_REGS_PARM2_CORE(real_regs);
 	*/
 	//unsigned long fd_id = ctx->rbx;
 	//char* file_name = (char*)fd_id;
-	bpf_trace_printk(fmt, sizeof(fmt), pathname);
+	/*
+	 * bpf_trace_printk(fmt, sizeof(fmt), (char*)ctx->rsi);
+	*/
+	const int dirfd = PT_REGS_PARM1(ctx);
+	const char *pathname = (char *)PT_REGS_PARM2(ctx);
+	char fmt[] = "@dirfd='%d' @pathname='%s'";
+
+	bpf_trace_printk(fmt, sizeof(fmt), dirfd, pathname);
 
 	int pid = bpf_get_current_pid_tgid() >> 32;
-        bpf_printk("Hello, world, from BPF! My PID is %d\n", pid);
+ 
+ 	bpf_printk("Hello, world, from BPF! My PID is %d\n", pid);
         valp = bpf_map_lookup_elem(&kprobe_map, &key);
-        if (!valp) {
+
+	if (!valp) {
                 bpf_map_update_elem(&kprobe_map, &key, &initval, BPF_ANY);
                 return 0;
         }

@@ -14,11 +14,8 @@ struct bpf_map_def SEC("maps") counting_map = {
 // This struct is defined according to the following format file:
 // /sys/kernel/debug/tracing/events/kmem/mm_page_alloc/format
 struct syscalls_enter_openat_args {
-	unsigned short common_type;
-	unsigned char common_flags;
-	unsigned char common_preempt_count;
-	int common_pid;
-	long syscall_nr;
+	long dont_touch;
+	int syscall_nr;
 	long dfd;
 	long filename_ptr;
 	long flags;
@@ -35,7 +32,7 @@ int sys_enter_openat(struct syscalls_enter_openat_args *ctx) {
 		char msg[] = "Hello eBPF!";
 	bpf_trace_printk(msg, sizeof(msg));
  	char fmt[] = "@dirfd='%d' @pathname='%s'";
-
+	bpf_printk("syscall_nr: %d", ctx->syscall_nr);
 	bpf_trace_printk(fmt, sizeof(fmt), ctx->dfd, (char *)ctx->filename_ptr);
 
 	valp = bpf_map_lookup_elem(&counting_map, &key);
